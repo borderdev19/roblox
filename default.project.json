@@ -1,0 +1,27 @@
+{
+  "name": "Creature Island Mini Tycoon",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "CreatureConfig": {
+        "$path": "src/shared/CreatureConfig.luau"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "GameServer": {
+        "$path": "src/server/GameServer.server.luau"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "GameClient": {
+          "$path": "src/client/GameClient.client.luau"
+        }
+      }
+    }
+  }
+}
