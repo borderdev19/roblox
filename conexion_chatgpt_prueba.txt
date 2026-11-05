@@ -1,0 +1,3 @@
+Prueba de escritura de ChatGPT en el repositorio borderdev19/roblox.
+Fecha: 2026-11-05.
+Este archivo confirma que la integración puede crear archivos directamente en GitHub.
