@@ -13,6 +13,7 @@ stateEvent.Parent = ReplicatedStorage
 
 local states = {}
 local lastAction = {}
+local loadSucceeded = {}
 local function fresh()
     return {coins = Config.StartingCoins, creatures = {}, upgrade = 0, island = 1}
 end
@@ -52,7 +53,7 @@ local function sync(player)
 end
 local function save(player)
     local s = states[player]
-    if not s then return end
+    if not s or not loadSucceeded[player] then return end
     local ok, err = pcall(function()
         store:UpdateAsync("p_" .. player.UserId, function() return s end)
     end)
@@ -62,12 +63,14 @@ Players.PlayerAdded:Connect(function(player)
     local ok, data = pcall(function() return store:GetAsync("p_" .. player.UserId) end)
     if not ok then warn("Creature Island load failed:", player.UserId) end
     states[player] = sanitize(ok and data or nil)
+    loadSucceeded[player] = ok
     sync(player)
 end)
 Players.PlayerRemoving:Connect(function(player)
     save(player)
     states[player] = nil
     lastAction[player] = nil
+    loadSucceeded[player] = nil
 end)
 remote.OnServerEvent:Connect(function(player, action, index)
     local s = states[player]
