@@ -1,0 +1,20 @@
+name: Build Roblox place
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rojo CLI
+        run: cargo install rojo --version 7.5.1 --locked
+      - name: Build Roblox place
+        run: rojo build default.project.json --output CreatureIsland.rbxlx
+      - name: Upload place artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CreatureIsland-place
+          path: CreatureIsland.rbxlx
+          if-no-files-found: error
