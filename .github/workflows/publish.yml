@@ -1,0 +1,41 @@
+name: Publish Creature Island to Roblox
+on:
+  workflow_dispatch:
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: roblox-private
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required configuration
+        env:
+          UNIVERSE_ID: ${{ vars.ROBLOX_UNIVERSE_ID }}
+          PLACE_ID: ${{ vars.ROBLOX_PLACE_ID }}
+          API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+        run: |
+          test -n "$UNIVERSE_ID" || { echo "::error::Missing ROBLOX_UNIVERSE_ID"; exit 1; }
+          test -n "$PLACE_ID" || { echo "::error::Missing ROBLOX_PLACE_ID"; exit 1; }
+          test -n "$API_KEY" || { echo "::error::Missing ROBLOX_API_KEY"; exit 1; }
+      - name: Install Rojo CLI
+        run: cargo install rojo --version 7.5.1 --locked
+      - name: Build place
+        run: rojo build default.project.json --output CreatureIsland.rbxlx
+      - name: Publish to private Roblox experience
+        env:
+          UNIVERSE_ID: ${{ vars.ROBLOX_UNIVERSE_ID }}
+          PLACE_ID: ${{ vars.ROBLOX_PLACE_ID }}
+          API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --output publish-response.json --write-out '%{http_code}' \
+            --request POST \
+            --header "x-api-key: $API_KEY" \
+            --header "Content-Type: application/xml" \
+            --data-binary @CreatureIsland.rbxlx \
+            "https://apis.roblox.com/universes/v1/$UNIVERSE_ID/places/$PLACE_ID/versions?versionType=Published")
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "::error::Roblox publish returned HTTP $status"
+            cat publish-response.json
+            exit 1
+          fi
+          echo "Roblox accepted the place publication (HTTP $status)."
